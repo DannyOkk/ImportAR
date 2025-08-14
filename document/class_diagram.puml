@@ -1,0 +1,45 @@
+@startuml
+title ImportAR – Core (User -> Simulation -> Budget + Expenses)
+
+skinparam classAttributeIconSize 0
+
+class Usuario {
+  -_id: str
+  -_nombre: str
+  -_email: str
+  -_password_hash: str
+  -_rol: str
+  -_plan: str
+  -_fecha_alta: datetime
+  --
+  +iniciarSimulacion(): Simulacion
+}
+
+class Simulacion {
+  -_id: str
+  -_usuario_id: str
+  -_status: str
+  -_num_escenario: int
+  -_started_at: datetime
+  -_finished_at: datetime
+  --
+  +generarPresupuesto(): Presupuesto
+  +calcularGastos(): null
+}
+
+class Presupuesto {
+  -_id: str
+  -_simulacion_id: str
+  -_estado: str
+  -_moneda: str
+  -_total: float
+  -_detalle: dict
+  --
+  +calculaGastoTotal(): float
+}
+
+
+Usuario "1" o-- "0..*" Simulacion : realiza >
+Simulacion "1" o-- "1" Presupuesto : produce >
+
+@enduml

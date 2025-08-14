@@ -1,0 +1,66 @@
+@startuml
+title ImportAR – Secuencia (User -> Simulation -> Budget + Expenses) con 3 DBs
+
+autonumber
+skinparam participantPadding 12
+skinparam responseMessageBelowArrow true
+
+actor Usuario
+participant "App/Service" as SVC
+participant "Simulacion" as SIM
+participant "Presupuesto" as BUD
+participant "Env Router\n(ENV=DEV|TEST|PROD)" as ENV
+database "MySQL (Development)" as DB_DEV
+database "MySQL (Test)" as DB_TEST
+database "MySQL (Production)" as DB_PROD
+
+== Iniciar simulación ==
+Usuario -> SVC : iniciarSimulacion()
+activate SVC
+SVC -> ENV : resolve DB for ENV
+
+alt ENV == DEV
+  ENV -> DB_DEV : INSERT Simulation{status="RUNNING", started_at=now}
+  DB_DEV --> ENV : {simulation_id}
+else ENV == TEST
+  ENV -> DB_TEST : INSERT Simulation{status="RUNNING", started_at=now}
+  DB_TEST --> ENV : {simulation_id}
+else ENV == PROD
+  ENV -> DB_PROD : INSERT Simulation{status="RUNNING", started_at=now}
+  DB_PROD --> ENV : {simulation_id}
+end
+ENV --> SVC : simulation_id
+
+== Cálculo de gastos y generación de presupuesto ==
+SVC -> SIM : calcularGastos()
+activate SIM
+SIM --> SVC : gastos[]
+deactivate SIM
+
+SVC -> SIM : generarPresupuesto()
+activate SIM
+SIM --> SVC : Presupuesto (instancia)
+deactivate SIM
+
+SVC -> BUD : calculaGastoTotal()
+activate BUD
+BUD --> SVC : total
+deactivate BUD
+
+== Persistir presupuesto y cerrar simulación ==
+SVC -> ENV : resolve DB for ENV
+
+alt ENV == DEV
+  ENV -> DB_DEV : INSERT Budget{simulation_id,total,estado="COMPLETED", moneda, detalle}
+  ENV -> DB_DEV : UPDATE Simulation{status="COMPLETED", finished_at=now}
+else ENV == TEST
+  ENV -> DB_TEST : INSERT Budget{simulation_id,total,estado="COMPLETED", moneda, detalle}
+  ENV -> DB_TEST : UPDATE Simulation{status="COMPLETED", finished_at=now}
+else ENV == PROD
+  ENV -> DB_PROD : INSERT Budget{simulation_id,total,estado="COMPLETED", moneda, detalle}
+  ENV -> DB_PROD : UPDATE Simulation{status="COMPLETED", finished_at=now}
+end
+
+SVC --> Usuario : 201 Created {simulation_id, budget_id, total}
+deactivate SVC
+@enduml
