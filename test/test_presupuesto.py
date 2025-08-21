@@ -2,7 +2,7 @@ import unittest
 import os
 from flask import current_app
 from app import create_app
-from test.simulacion_service import SimulacionServiceTest
+from test.presupuesto_service import PresupuestoServiceTest
 
 class SimulationTest(unittest.TestCase):
 
@@ -18,11 +18,13 @@ class SimulationTest(unittest.TestCase):
     def test_app(self):
         self.assertIsNotNone(current_app)
 
-    def test_simulation_creation(self):
-        simulacion= SimulacionServiceTest.simulacion_creation()
-        self.assertIsNotNone(simulacion)
-        self.assertEqual(simulacion.estado, "activo")
-        self.assertEqual(simulacion.num_escenario, 1)
+    def test_presupuesto_creation(self):
+        presupuesto = PresupuestoServiceTest.presupuesto_creation()
+        self.assertIsNotNone(presupuesto)
+        self.assertEqual(presupuesto.estado, "finalizado")
+        self.assertEqual(presupuesto.moneda, "USD")
+        self.assertEqual(presupuesto.total, 1000.0)
+        self.assertEqual(presupuesto.detalle, "Detalle del presupuesto")
 
 if __name__ == '__main__':
     unittest.main()
