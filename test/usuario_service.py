@@ -1,5 +1,4 @@
 import datetime
-
 from app.models import Usuario
 
 class UsuarioServiceTest:
