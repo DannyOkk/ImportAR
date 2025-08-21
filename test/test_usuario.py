@@ -4,6 +4,7 @@ import os
 from flask import current_app
 from app import create_app
 from app.models import Usuario
+from test.usuario_service import UsuarioServiceTest
 
 class UsuarioTest(unittest.TestCase):
 
@@ -20,13 +21,9 @@ class UsuarioTest(unittest.TestCase):
         self.assertIsNotNone(current_app)
 
     def test_usuario_creation(self):
-        usuario=Usuario()
-        usuario.nombre = "Test User"
-        usuario.email = "test@example.com"
-        usuario.password = "securepassword"
-        usuario.rol = "admin"
-        usuario.plan = "basic"
-        usuario.fecha_alta = datetime.datetime.now()
+        
+        usuario = UsuarioServiceTest.usuario_creation()
+
         self.assertIsNotNone(usuario)
         self.assertEqual(usuario.nombre, "Test User")
         self.assertEqual(usuario.email, "test@example.com")

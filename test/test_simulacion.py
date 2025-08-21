@@ -4,6 +4,7 @@ import os
 from flask import current_app
 from app import create_app
 from app.models import Simulacion, Usuario
+from test.usuario_service import UsuarioServiceTest
 
 class SimulationTest(unittest.TestCase):
 
@@ -21,18 +22,15 @@ class SimulationTest(unittest.TestCase):
 
     def test_simulation_creation(self):
         simulacion=Simulacion()
-        simulacion.usuario=Usuario()
-        simulacion.usuario.nombre = "Test User"
-        simulacion.usuario.email = "test@example.com"
-        simulacion.usuario.password = "securepassword"
-        simulacion.usuario.rol = "admin"
-        simulacion.usuario.plan = "basic"
-        simulacion.usuario.fecha_alta = datetime.datetime.now()
+        #TODO: Refactorizarlo a un archivo separado
+        simulacion.usuario=UsuarioServiceTest.usuario_creation()
         simulacion.estado="activo"
         simulacion.num_escenario=1
         simulacion.fecha_creacion=datetime.datetime.now()
         simulacion.fecha_finalizacion=datetime.datetime.now() 
-
+        self.assertIsNotNone(simulacion)
+        self.assertEqual(simulacion.estado, "activo")
+        self.assertEqual(simulacion.num_escenario, 1)
 
 if __name__ == '__main__':
     unittest.main()
