@@ -18,3 +18,14 @@ class UsuarioRepository:
     @staticmethod
     def read_all() -> list[Usuario]:
         return db.session.query(Usuario).all()
+    
+    @staticmethod
+    def update(usuario: Usuario) -> Usuario:
+        db.session.merge(usuario)
+        db.session.commit()
+        return usuario
+    
+    @staticmethod
+    def delete(usuario: Usuario) -> None:
+        db.session.delete(usuario)
+        db.session.commit()

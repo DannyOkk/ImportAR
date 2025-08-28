@@ -62,6 +62,27 @@ class UsuarioTest(unittest.TestCase):
         self.assertIsNotNone(usuarios)
         self.assertGreaterEqual(len(usuarios), 2)
 
+    def test_usuario_update(self):
+        usuario = UsuarioServiceTest.usuario_creation()
+        UsuarioService.create(usuario)
+
+        updated_usuario = UsuarioService.get_by_id(usuario.id)
+
+        usuario.nombre = "Updated User"
+        updated_usuario = UsuarioService.update(usuario, usuario.id)
+        
+        self.assertIsNotNone(updated_usuario)
+        self.assertEqual(updated_usuario.nombre, "Updated User")
+
+    def test_usuario_delete(self):
+        usuario = UsuarioServiceTest.usuario_creation()
+        UsuarioService.create(usuario)
+
+        deleted_usuario = UsuarioService.delete(usuario.id)
+
+        self.assertTrue(deleted_usuario)
+    
+
 if __name__ == '__main__':
     unittest.main()
 

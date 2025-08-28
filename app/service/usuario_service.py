@@ -29,3 +29,38 @@ class UsuarioService:
         """
         return UsuarioRepository.read_all()
 
+    @staticmethod
+    def update(usuario: Usuario, id: int) -> Usuario:
+        """
+        Update an existing user in the database.
+        :param usuario: Usuario object with updated data.
+        :param id: The ID of the user to update.
+        :return: The updated Usuario object.
+        """
+        existing_usuario = UsuarioService.get_by_id(id)
+        if not existing_usuario:
+            return None
+        
+        existing_usuario.nombre = usuario.nombre
+        existing_usuario.email = usuario.email
+        existing_usuario.password_hash = usuario.password_hash
+        existing_usuario.rol = usuario.rol
+        existing_usuario.plan = usuario.plan
+
+        UsuarioRepository.update(existing_usuario)
+
+        return existing_usuario
+
+    @staticmethod
+    def delete(id: int) -> bool:
+        """
+        Delete a user from the database.
+        :param id: The ID of the user to delete.
+        :return: True if deletion was successful, else False.
+        """
+        usuario = UsuarioService.get_by_id(id)
+        if not usuario:
+            return False
+        
+        UsuarioRepository.delete(usuario)
+        return True
