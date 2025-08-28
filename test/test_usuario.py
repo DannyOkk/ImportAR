@@ -28,7 +28,6 @@ class UsuarioTest(unittest.TestCase):
         usuario = UsuarioServiceTest.usuario_creation()
         UsuarioService.create(usuario)
 
-
         self.assertIsNotNone(usuario)
         self.assertIsNotNone(usuario.id)
         self.assertGreater(usuario.id ,0)
@@ -38,5 +37,20 @@ class UsuarioTest(unittest.TestCase):
         self.assertEqual(usuario.rol, "admin")
         self.assertEqual(usuario.plan, "basic")
 
+    def test_usuario_read(self):
+        usuario = UsuarioServiceTest.usuario_creation()
+        UsuarioService.create(usuario)
+
+        fetched_usuario = UsuarioService.get_by_id(usuario.id)
+
+        self.assertIsNotNone(fetched_usuario)
+        self.assertEqual(fetched_usuario.id, usuario.id)
+        self.assertEqual(fetched_usuario.nombre, "Test User")
+        self.assertEqual(fetched_usuario.email, "test@example.com")
+        self.assertEqual(usuario.password_hash, "securepassword")
+        self.assertEqual(usuario.rol, "admin")
+        self.assertEqual(usuario.plan, "basic")
+
 if __name__ == '__main__':
     unittest.main()
+

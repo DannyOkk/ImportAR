@@ -8,4 +8,8 @@ class UsuarioRepository:
         db.session.commit()
         return usuario
 
+    @staticmethod
+    def get_by_id(id: int) -> Usuario:
+
+        return db.session.query(Usuario).filter_by(id=id).first()
     

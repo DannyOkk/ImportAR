@@ -12,6 +12,12 @@ class UsuarioService:
         UsuarioRepository.create(usuario)
 
         return usuario
-
+    def get_by_id(id: int) -> Usuario:
+        """
+        Retrieve a user by their ID.
+        :param id: The ID of the user to retrieve.
+        :return: The Usuario object if found, else None.
+        """
+        return UsuarioRepository.get_by_id(id)
 
 
