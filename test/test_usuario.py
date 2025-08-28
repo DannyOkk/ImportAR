@@ -51,6 +51,17 @@ class UsuarioTest(unittest.TestCase):
         self.assertEqual(usuario.rol, "admin")
         self.assertEqual(usuario.plan, "basic")
 
+    def test_usuario_read_all(self):
+        usuario1 = UsuarioServiceTest.usuario_creation()
+        UsuarioService.create(usuario1)
+
+        usuario2 = UsuarioServiceTest.usuario_creation()
+        usuario2.email = "test2@example.com"
+        UsuarioService.create(usuario2)
+        usuarios = UsuarioService.read_all()
+        self.assertIsNotNone(usuarios)
+        self.assertGreaterEqual(len(usuarios), 2)
+
 if __name__ == '__main__':
     unittest.main()
 

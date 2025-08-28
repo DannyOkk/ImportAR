@@ -1,5 +1,6 @@
 from app.models import Usuario
 from app.repositories import UsuarioRepository
+from typing import List
 
 class UsuarioService:
     @staticmethod
@@ -20,4 +21,11 @@ class UsuarioService:
         """
         return UsuarioRepository.get_by_id(id)
 
+    @staticmethod   
+    def read_all() -> list[Usuario]:
+        """
+        Retrieve all users from the database.
+        :return: A list of all Usuario objects.
+        """
+        return UsuarioRepository.read_all()
 

@@ -1,5 +1,7 @@
 from app.models import Usuario
 from app import db
+from typing import List
+
 class UsuarioRepository: 
 
     @staticmethod
@@ -13,3 +15,6 @@ class UsuarioRepository:
 
         return db.session.query(Usuario).filter_by(id=id).first()
     
+    @staticmethod
+    def read_all() -> list[Usuario]:
+        return db.session.query(Usuario).all()
