@@ -8,7 +8,7 @@ class UsuarioServiceTest:
         usuario = Usuario()
         usuario.nombre = "Test User"
         usuario.email = "test@example.com"
-        usuario.password = "securepassword"
+        usuario.password_hash = "securepassword"
         usuario.rol = "admin"
         usuario.plan = "basic"
         usuario.fecha_alta = datetime.datetime.now()
