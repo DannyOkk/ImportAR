@@ -1,11 +1,16 @@
 from dataclasses import dataclass
 import datetime
 from app.models.usuario import Usuario
+from app import db
 
 @dataclass(init=False)
-class Simulacion:
-  usuario: Usuario
-  estado: str
-  num_escenario: int
-  fecha_creacion: datetime
-  fecha_finalizacion: datetime
+class Simulacion(db.Model):
+  __tablename__ = 'simulaciones'
+
+  id: int = db.Column(db.Integer, primary_key=True, autoincrement=True)
+  usuario_id: int = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
+  usuario = db.relationship('Usuario', backref='simulaciones')
+  estado: str = db.Column(db.String(50), nullable=False)
+  num_escenario: int = db.Column(db.Integer, nullable=False)
+  fecha_creacion: datetime.datetime = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+  fecha_finalizacion: datetime.datetime = db.Column(db.DateTime, nullable=True)
