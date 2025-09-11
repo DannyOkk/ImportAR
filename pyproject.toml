@@ -9,6 +9,7 @@ dependencies = [
     "flask==3.1.1",
     "flask-sqlalchemy>=3.1.1",
     "mysql-connector-python==9.4.0",
+    "passlib==1.7.4",
     "pyrefly>=0.28.1",
     "sqlalchemy>=2.0.43",
 ]

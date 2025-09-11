@@ -1,6 +1,7 @@
 from app.models import Usuario
 from app.repositories import UsuarioRepository
 from typing import List
+from app.service import EncrypterService, EncrypterManager, StandardEncrypterService, PasslibEncrypterService
 
 class UsuarioService:
     @staticmethod
@@ -10,6 +11,7 @@ class UsuarioService:
         :param usuario: Usuario object to be created.   
         :return: The created Usuario object.
         """
+        usuario.password_hash = EncrypterManager.hash_password(usuario.password_hash)
         UsuarioRepository.create(usuario)
 
         return usuario

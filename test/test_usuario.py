@@ -2,8 +2,9 @@ import unittest
 import os
 from flask import current_app
 from app import create_app, db
+from app.service import UsuarioService, EncrypterManager
 from test.usuario_service import UsuarioServiceTest
-from app.service import UsuarioService
+
 
 class UsuarioTest(unittest.TestCase):
 
@@ -33,7 +34,7 @@ class UsuarioTest(unittest.TestCase):
         self.assertGreater(usuario.id ,0)
         self.assertEqual(usuario.nombre, "Test User")
         self.assertEqual(usuario.email, "test@example.com")
-        self.assertEqual(usuario.password_hash, "securepassword")
+        self.assertNotEqual(usuario.password_hash, "securepassword")
         self.assertEqual(usuario.rol, "admin")
         self.assertEqual(usuario.plan, "basic")
 
@@ -47,7 +48,8 @@ class UsuarioTest(unittest.TestCase):
         self.assertEqual(fetched_usuario.id, usuario.id)
         self.assertEqual(fetched_usuario.nombre, "Test User")
         self.assertEqual(fetched_usuario.email, "test@example.com")
-        self.assertEqual(usuario.password_hash, "securepassword")
+        self.assertNotEqual(usuario.password_hash, "securepassword")
+        self.assertTrue(EncrypterManager.check_password(usuario.password_hash, "securepassword"))
         self.assertEqual(usuario.rol, "admin")
         self.assertEqual(usuario.plan, "basic")
 
