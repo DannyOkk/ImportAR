@@ -1,11 +1,11 @@
 from app.models import Presupuesto
 from app import db
+from app.repositories import Create, Read
 
-class PresupuestoRepository:
+class PresupuestoRepository(Create, Read):
 
     @staticmethod
     def create(presupuesto: Presupuesto) -> Presupuesto:
-        """If the Presupuesto is a SQLAlchemy model, persist it; otherwise return as-is."""
         if hasattr(presupuesto, "__table__"):
             db.session.add(presupuesto)
             db.session.commit()

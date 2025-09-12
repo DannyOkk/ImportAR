@@ -1,8 +1,9 @@
 from app.models import Simulacion
 from app import db
 from typing import List
+from app.repositories import Create, Read
 
-class SimulacionRepository: 
+class SimulacionRepository(Create, Read): 
 
     @staticmethod
     def create(simulacion: Simulacion) -> Simulacion:

@@ -1,8 +1,9 @@
 from app.models import Usuario
 from app import db
 from typing import List
+from app.repositories import Create, Read, Update, Delete
 
-class UsuarioRepository: 
+class UsuarioRepository(Create, Read, Update, Delete): 
 
     @staticmethod
     def create(usuario: Usuario) -> Usuario:
