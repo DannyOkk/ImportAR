@@ -45,9 +45,13 @@ class UsuarioService:
         #TODO: Si el password ha cambiado, encriptarlo de nuevo, sino dejarlo igual
         existing_usuario.nombre = usuario.nombre
         existing_usuario.email = usuario.email
-        existing_usuario.password_hash = usuario.password_hash
         existing_usuario.rol = usuario.rol
         existing_usuario.plan = usuario.plan
+
+        # Rehashear si vino un password nuevo (texto plano). Si no vino, dejar el hash actual.
+        new_pwd = usuario.password_hash
+        if new_pwd:  # no tocar si viene None/''
+            existing_usuario.password_hash = EncrypterManager.hash_password(new_pwd)
 
         UsuarioRepository.update(existing_usuario)
 

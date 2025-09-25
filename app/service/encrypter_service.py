@@ -67,3 +67,10 @@ class EncrypterManager:
     @classmethod
     def check_password(cls, stored_password_hash: str, provided_password: str) -> bool:
         return cls._encrypter.check_password(stored_password_hash, provided_password)
+    
+    @staticmethod
+    def verify_password(plain: str, hashed: str) -> bool:
+        try:
+            return check_password_hash(hashed, plain)
+        except Exception:
+            return False

@@ -76,6 +76,26 @@ class UsuarioTest(unittest.TestCase):
         self.assertIsNotNone(updated_usuario)
         self.assertEqual(updated_usuario.nombre, "Updated User")
 
+    def test_usuario_update_password_changes(self):
+        # Crear usuario inicial con password en texto plano (se hashea en create)
+        usuario = UsuarioServiceTest.usuario_creation()
+        UsuarioService.create(usuario)
+
+        # Guardar el hash anterior
+        old_hash = usuario.password_hash
+        self.assertTrue(EncrypterManager.check_password(old_hash, "securepassword"))
+
+        # Actualizar con una nueva contraseña en texto plano
+        usuario.password_hash = "new_secure_password"
+        updated = UsuarioService.update(usuario, usuario.id)
+
+        # Traer de BD y verificar que cambió el hash y valida solo la nueva
+        fetched = UsuarioService.get_by_id(usuario.id)
+        self.assertIsNotNone(fetched)
+        self.assertNotEqual(fetched.password_hash, old_hash)
+        self.assertTrue(EncrypterManager.check_password(fetched.password_hash, "new_secure_password"))
+        self.assertFalse(EncrypterManager.check_password(fetched.password_hash, "securepassword"))
+
     def test_usuario_delete(self):
         usuario = UsuarioServiceTest.usuario_creation()
         UsuarioService.create(usuario)
