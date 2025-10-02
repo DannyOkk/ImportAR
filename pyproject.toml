@@ -7,10 +7,13 @@ requires-python = ">=3.13"
 dependencies = [
     "dotenv>=0.9.9",
     "flask==3.1.1",
+    "flask-marshmallow==1.3.0",
+    "flask-migrate==4.1.0",
     "flask-sqlalchemy>=3.1.1",
+    "marshmallow-sqlalchemy==1.4.2",
     "mysql-connector-python==9.4.0",
     "passlib==1.7.4",
-    "pyrefly>=0.28.1",
+    "pyrefly>=0.35.0",
     "sqlalchemy>=2.0.43",
 ]
 

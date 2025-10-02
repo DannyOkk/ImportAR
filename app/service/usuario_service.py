@@ -42,7 +42,6 @@ class UsuarioService:
         existing_usuario = UsuarioService.get_by_id(id)
         if not existing_usuario:
             return None
-        #TODO: Si el password ha cambiado, encriptarlo de nuevo, sino dejarlo igual
         existing_usuario.nombre = usuario.nombre
         existing_usuario.email = usuario.email
         existing_usuario.rol = usuario.rol
