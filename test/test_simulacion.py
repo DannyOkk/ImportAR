@@ -56,5 +56,11 @@ class SimulationTest(unittest.TestCase):
         self.assertEqual(all_simulaciones[0].num_escenario, 1)
         self.assertEqual(all_simulaciones[1].num_escenario, 2)
 
+    def test_simulation_task(self):
+        simulacion2= SimulacionServiceTest.simulacion_creation()
+        result= SimulacionService.execute(simulacion2)
+        self.assertTrue(result)
+
+
 if __name__ == '__main__':
     unittest.main()

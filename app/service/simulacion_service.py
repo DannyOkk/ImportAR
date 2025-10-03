@@ -1,6 +1,7 @@
 from app.models import Simulacion
 from app.repositories import SimulacionRepository
 from typing import List
+from app.service import Task, CalculateTask, BudgetTask, EmailTask
 
 class SimulacionService:
     @staticmethod
@@ -28,3 +29,21 @@ class SimulacionService:
         :return: A list of all Simulacion objects.
         """
         return SimulacionRepository.read_all()
+
+    @staticmethod
+    def execute(simulacion: Simulacion) -> bool:
+        """
+        Execute a simulation task.
+        :param simulacion: Simulacion object to be executed.
+        :return: True if the task was executed successfully, else False.
+        """
+        task = Task(simulacion)
+        calculate = CalculateTask()
+        budget = BudgetTask()
+        email = EmailTask()
+        task.add(calculate)
+        task.add(budget)
+        task.add(email)
+
+        result = task.execute()
+        return result

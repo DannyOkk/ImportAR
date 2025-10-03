@@ -24,7 +24,8 @@ def create_app() -> Flask:
     ma.init_app(app)
     migrate.init_app(app, db)
 
-    from app.resource import home_bp, usuario_bp
+    from app.resource import home_bp, usuario_bp, simulacion_bp
+    app.register_blueprint(simulacion_bp, url_prefix='/api/v1/simulaciones')
     app.register_blueprint(usuario_bp, url_prefix='/api/v1/usuarios')
     app.register_blueprint(home_bp, url_prefix='/api/v1')
     @app.shell_context_processor    
