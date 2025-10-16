@@ -1,1 +1,3 @@
 from .usuario_service import UsuarioServiceTest
+from .presupuesto_service import PresupuestoServiceTest
+from .simulacion_service import SimulacionServiceTest

@@ -7,8 +7,6 @@ class Presupuesto(db.Model):
   
   __tablename__ = 'presupuestos'
   id: int = db.Column(db.Integer, primary_key=True, autoincrement=True)
-  simulacion_id: int = db.Column(db.Integer, db.ForeignKey('simulaciones.id'), nullable=False)
-  simulacion = db.relationship('Simulacion', backref='presupuestos')
   estado: str = db.Column(db.String(50), nullable=False)
   moneda: str = db.Column(db.String(10), nullable=False)
   total: float = db.Column(db.Float, nullable=False)

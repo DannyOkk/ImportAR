@@ -9,7 +9,9 @@ class Simulacion(db.Model):
 
   id: int = db.Column(db.Integer, primary_key=True, autoincrement=True)
   usuario_id: int = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
-  usuario = db.relationship('Usuario', backref='simulaciones')
+  usuario = db.relationship('Usuario')
+  presupuesto_id = db.Column(db.Integer, db.ForeignKey('presupuestos.id'), nullable=False)  # Puede ser null si no se generó presupuesto
+  presupuesto = db.relationship('Presupuesto', uselist=False)
   estado: str = db.Column(db.String(50), nullable=False)
   num_escenario: int = db.Column(db.Integer, nullable=False)
   fecha_creacion: datetime.datetime = db.Column(db.DateTime, default=datetime.datetime.utcnow)

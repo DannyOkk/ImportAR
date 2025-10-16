@@ -1,27 +1,37 @@
-FROM python:3.13.6-slim-bullseye
+FROM python:3.13-slim
 
-ENV FLASK_CONTEXT=production
+ENV BACKEND_ENV=production
+ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-ENV PATH=$PATH:/home/flaskapp/.local/bin
+ENV PATH="/root/.local/bin:$PATH"
 
-RUN useradd --create-home --home-dir /home/flaskapp flaskapp
-RUN apt-get update
-RUN apt-get install -y python3-dev build-essential libpq-dev python3-psycopg2
-RUN apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false
-RUN rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    ca-certificates \
+    curl \
+    htop \
+    iputils-ping && \
+    rm -rf /var/lib/apt/lists/*
 
-WORKDIR /home/flaskapp
+RUN groupadd -r appuser && useradd --no-create-home -r -g appuser appuser
 
-USER flaskapp
-RUN mkdir app
+ADD https://astral.sh/uv/install.sh /uv-installer.sh
+RUN sh /uv-installer.sh && rm /uv-installer.sh
+
+WORKDIR /home/appuser
+
+COPY ./pyproject.toml ./uv.lock ./ 
+RUN uv sync --locked
 
 COPY ./app ./app
-COPY ./app.py .
 
-ADD requirements.txt ./requirements.txt
+RUN chown -R appuser:appuser /home/appuser
 
-RUN pip install --no-cache-dir -r requirements.txt
+USER appuser
+
+ENV PATH="/home/appuser/.venv/bin:$PATH"
 
 EXPOSE 5000
 
-CMD [ "python", "./app.py" ]
+CMD ["gunicorn", "app:create_app()", "--bind", "0.0.0.0:5000", "--workers", "4", "--log-level", "INFO"]

@@ -1,7 +1,9 @@
 from app.models import Simulacion
 from app.repositories import SimulacionRepository
 from typing import List
-from app.service import Task, CalculateTask, BudgetTask, EmailTask
+from app.service import Task, CalculateTask, BudgetTask, EmailTask, UsuarioService, PresupuestoService
+from datetime import datetime
+from random import randint
 
 class SimulacionService:
     @staticmethod
@@ -31,13 +33,21 @@ class SimulacionService:
         return SimulacionRepository.read_all()
 
     @staticmethod
-    def execute(simulacion: Simulacion) -> bool:
+    def execute(dto: Simulacion) -> bool:
         """
         Execute a simulation task.
         :param simulacion: Simulacion object to be executed.
         :return: True if the task was executed successfully, else False.
+        DTO: Data Transfer Object
         """
-        task = Task(simulacion)
+
+        #TODO: refactorizar
+        simulacion = Simulacion()
+        simulacion.usuario = UsuarioService.get_by_id(dto.usuario.id)
+        simulacion.estado = "procesando"
+        simulacion.fecha_creacion = datetime.now()
+        simulacion.num_escenario = randint(1, 100)
+        task = Task()
         calculate = CalculateTask()
         budget = BudgetTask()
         email = EmailTask()
@@ -45,5 +55,13 @@ class SimulacionService:
         task.add(budget)
         task.add(email)
 
-        result = task.execute()
+        result = task.execute(simulacion)
+        if result:
+            simulacion.estado = "finalizado"
+            simulacion.fecha_finalizacion = datetime.now()
+            PresupuestoService.create(simulacion.presupuesto)
+            SimulacionService.create(simulacion)
+        else:
+            simulacion.estado = "error"
+            simulacion.fecha_finalizacion = datetime.now()
         return result
