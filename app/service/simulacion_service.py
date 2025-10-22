@@ -1,7 +1,9 @@
 from app.models import Simulacion
 from app.repositories import SimulacionRepository
 from typing import List
-from app.service import Task, CalculateTask, BudgetTask, EmailTask, UsuarioService, PresupuestoService
+from app.service.simulacion_tareas import Task, CalculateTask, BudgetTask, EmailTask
+from app.service.usuario_service import UsuarioService
+from app.service.presupuesto_service import PresupuestoService
 from datetime import datetime
 from random import randint
 
