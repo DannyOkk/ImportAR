@@ -10,11 +10,19 @@ class UsuarioService:
         Create a new user in the database.
         :param usuario: Usuario object to be created.   
         :return: The created Usuario object.
+        :raises ValueError: If the email already exists.
         """
+        # Verificar si el email ya existe
+        existing_usuario = UsuarioRepository.get_by_email(usuario.email)
+        if existing_usuario:
+            raise ValueError(f"El email {usuario.email} ya está registrado en el sistema")
+        
         usuario.password_hash = EncrypterManager.hash_password(usuario.password_hash)
         UsuarioRepository.create(usuario)
 
         return usuario
+    
+    @staticmethod
     def get_by_id(id: int) -> Usuario:
         """
         Retrieve a user by their ID.

@@ -8,7 +8,7 @@ def validate_with(schema):
         @wraps(f)
         def decorated_function(*args, **kwargs):
             try:
-                data, errors = schema().load(request.json)
+                data = schema().load(request.json)
             except ValidationError as err:
                 return jsonify(err.messages), 400
             return f(*args, **kwargs)

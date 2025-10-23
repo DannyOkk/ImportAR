@@ -30,11 +30,20 @@ def get_usuario(id: int):
 @validate_with(UsuarioSchema)
 def create_usuario():
     usuario = usuario_mapper.load(request.json)
-    UsuarioService.create(usuario)
-    rb= ResponseBuilder()
-    message=rb.add_message("Usuario creado en el sistema").add_status_code(201).add_data({}).add_path(f"/api/v1/usuarios/").build()
-        
-    return message_mapper.dump(message, many=False), 201
+    rb = ResponseBuilder()
+    
+    try:
+        UsuarioService.create(usuario)
+        message = rb.add_message("Usuario creado en el sistema").add_status_code(201).add_data({}).add_path(f"/api/v1/usuarios/").build()
+        return message_mapper.dump(message, many=False), 201
+    except ValueError as e:
+        # Email duplicado u otro error de validación
+        message = rb.add_message(str(e)).add_status_code(409).add_data({}).add_path(f"/api/v1/usuarios/").build()
+        return message_mapper.dump(message, many=False), 409
+    except Exception as e:
+        # Cualquier otro error
+        message = rb.add_message(f"Error al crear usuario: {str(e)}").add_status_code(500).add_data({}).add_path(f"/api/v1/usuarios/").build()
+        return message_mapper.dump(message, many=False), 500
 
 @usuario_bp.route('/<int:id>', methods=['PUT'])
 def update_usuario(id: int):
