@@ -17,6 +17,15 @@ class UsuarioRepository(Create, Read, Update, Delete):
         return db.session.query(Usuario).filter_by(id=id).first()
     
     @staticmethod
+    def get_by_email(email: str) -> Usuario:
+        """
+        Retrieve a user by their email address.
+        :param email: The email of the user to retrieve.
+        :return: The Usuario object if found, else None.
+        """
+        return db.session.query(Usuario).filter_by(email=email).first()
+    
+    @staticmethod
     def read_all() -> list[Usuario]:
         return db.session.query(Usuario).all()
     
