@@ -3,7 +3,9 @@ import os
 from flask import current_app
 from app import create_app, db
 from test.simulacion_service import SimulacionServiceTest
-from app.service import SimulacionService
+from test.usuario_service import UsuarioServiceTest
+from app.service import SimulacionService, UsuarioService
+from faker import Faker
 
 class SimulationTest(unittest.TestCase):
 
@@ -57,8 +59,14 @@ class SimulationTest(unittest.TestCase):
         self.assertEqual(all_simulaciones[1].num_escenario, 2)
 
     def test_simulation_task(self):
-        simulacion2= SimulacionServiceTest.simulacion_creation()
-        result= SimulacionService.execute(simulacion2)
+        fake = Faker()
+
+        user = UsuarioServiceTest.usuario_creation()
+        user.email = fake.unique.email()
+        UsuarioService.create(user)
+        simulacion2 = SimulacionServiceTest.simulacion_creation()
+        simulacion2.usuario = user
+        result = SimulacionService.execute(simulacion2)
         self.assertTrue(result)
 
 
