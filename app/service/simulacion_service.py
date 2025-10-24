@@ -44,11 +44,23 @@ class SimulacionService:
         """
 
         #TODO: refactorizar
+        # 1) Resolver user_id de manera robusta
+        user_id = getattr(dto, "usuario_id", None) or getattr(getattr(dto, "usuario", None), "id", None)
+        if not user_id:
+            return False
+
+        user = UsuarioService.get_by_id(user_id)
+        if not user:
+            return False
+
+        # 2) Construir entidad a persistir con FK seteado
         simulacion = Simulacion()
-        simulacion.usuario = UsuarioService.get_by_id(dto.usuario.id)
+        simulacion.usuario_id = user.id
         simulacion.estado = "procesando"
         simulacion.fecha_creacion = datetime.now()
         simulacion.num_escenario = randint(1, 100)
+
+        # 3) Ejecutar tareas
         task = Task()
         calculate = CalculateTask()
         budget = BudgetTask()
@@ -58,12 +70,14 @@ class SimulacionService:
         task.add(email)
 
         result = task.execute(simulacion)
+
+        # 4) Finalizar y persistir
+        simulacion.fecha_finalizacion = datetime.now()
         if result:
             simulacion.estado = "finalizado"
-            simulacion.fecha_finalizacion = datetime.now()
-            PresupuestoService.create(simulacion.presupuesto)
+            if getattr(simulacion, "presupuesto", None):
+                PresupuestoService.create(simulacion.presupuesto)
             SimulacionService.create(simulacion)
         else:
             simulacion.estado = "error"
-            simulacion.fecha_finalizacion = datetime.now()
         return result
