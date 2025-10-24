@@ -19,3 +19,7 @@ class SimulacionRepository(Create, Read):
     @staticmethod
     def read_all() -> list[Simulacion]:
         return db.session.query(Simulacion).all()
+
+    @staticmethod
+    def read_by_usuario(usuario_id: int) -> List[Simulacion]:
+        return (db.session.query(Simulacion).filter(Simulacion.usuario_id == usuario_id).order_by(Simulacion.id.desc()).all())
