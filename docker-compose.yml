@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  # Servicio MySQL (el que ya tenías del profe)
+  mysql:
+    container_name: mysql-servidor
+    image: mysql:8.0-debian
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+      MYSQL_DATABASE: importar
+      MYSQL_ROOT_PASSWORD: admin
+    volumes:
+      - ./data:/var/lib/mysql
+    networks:
+      - mired
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-padmin"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Servicio de tu aplicación ImportAR
+  app:
+    container_name: importar-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      # Variables de entorno para la app
+      FLASK_ENV: production
+      FLASK_CONTEXT: production
+      # Configuración de base de datos
+      DB_HOST: mysql-servidor
+      DB_PORT: 3306
+      DB_NAME: importar
+      DB_USER: admin
+      DB_PASSWORD: admin
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - mired
+    restart: unless-stopped
+
+networks:
+  mired:
+    external: true
