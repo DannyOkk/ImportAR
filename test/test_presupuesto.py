@@ -1,19 +1,28 @@
 import unittest
 import os
+import json
+from decimal import Decimal
 from flask import current_app
 from app import create_app, db
 from test.presupuesto_service import PresupuestoServiceTest
-from app.service import PresupuestoService
+from test.usuario_service import UsuarioServiceTest
+from app.service import PresupuestoService, UsuarioService
 
-class SimulationTest(unittest.TestCase):
+class PresupuestoTest(unittest.TestCase):
 
     def setUp(self):
         os.environ['FLASK_CONTEXT'] = 'testing'
+        os.environ['A3500_FALLBACK'] = '1150.50'  # TC de prueba
         self.app = create_app()
         self.app_context = self.app.app_context()
         self.app_context.push()
+        self.client = self.app.test_client()
 
         db.create_all()
+        
+        # Crear usuario de prueba para los presupuestos
+        usuario = UsuarioServiceTest.usuario_creation()
+        self.usuario = UsuarioService.create(usuario)
 
     def tearDown(self):
         db.session.remove()
@@ -25,7 +34,7 @@ class SimulationTest(unittest.TestCase):
         self.assertIsNotNone(current_app)
 
     def test_presupuesto_creation(self):
-        presupuesto = PresupuestoServiceTest.presupuesto_creation()
+        presupuesto = PresupuestoServiceTest.presupuesto_creation(self.usuario.id)
         presupuesto = PresupuestoService.create(presupuesto)
         self.assertIsNotNone(presupuesto)
         self.assertGreater(presupuesto.id, 0)
@@ -35,7 +44,7 @@ class SimulationTest(unittest.TestCase):
         self.assertEqual(presupuesto.detalle, "Detalle del presupuesto")
 
     def test_presupuesto_read(self):
-        presupuesto = PresupuestoServiceTest.presupuesto_creation()
+        presupuesto = PresupuestoServiceTest.presupuesto_creation(self.usuario.id)
         presupuesto = PresupuestoService.create(presupuesto)
 
         fetched = PresupuestoService.get_by_id(presupuesto.id)
@@ -45,10 +54,10 @@ class SimulationTest(unittest.TestCase):
         self.assertEqual(fetched.moneda, "USD")
 
     def test_presupuesto_read_all(self):
-        p1 = PresupuestoServiceTest.presupuesto_creation()
+        p1 = PresupuestoServiceTest.presupuesto_creation(self.usuario.id)
         p1 = PresupuestoService.create(p1)
 
-        p2 = PresupuestoServiceTest.presupuesto_creation()
+        p2 = PresupuestoServiceTest.presupuesto_creation(self.usuario.id)
         p2.moneda = "ARS"
         p2 = PresupuestoService.create(p2)
 
@@ -56,6 +65,84 @@ class SimulationTest(unittest.TestCase):
 
         self.assertIsNotNone(all_presupuestos)
         self.assertGreater(len(all_presupuestos), 0)
+
+    # ==================== TESTS DE CÁLCULO ====================
+
+    def test_calcular_modo_cif(self):
+        """Test: Cuando modo_precio es CIF, debe devolver el mismo valor"""
+        articulo = PresupuestoServiceTest.articulo_notebook_cif()
+        
+        cif, metadata = PresupuestoService.calcular_cif(articulo)
+        
+        self.assertEqual(cif, articulo.valor_usd)
+        self.assertEqual(metadata["modo"], "CIF")
+
+    def test_calcular_impuestos_sin_courier(self):
+        """Test: Calcular impuestos para celular sin courier (DI 8%)"""
+        cif = Decimal("1000.00")
+        origen = "US"
+        tipo = "celulares"
+        es_courier = False
+        
+        impuestos = PresupuestoService.calcular_impuestos(cif, origen, tipo, es_courier)
+        
+        self.assertIn("di", impuestos)
+        self.assertIn("tasa_est", impuestos)
+        self.assertIn("iva", impuestos)
+        self.assertIn("percep_iva", impuestos)
+        self.assertIn("percep_gan", impuestos)
+        
+        # DI debe ser 8% para celular sin courier
+        self.assertEqual(impuestos["di"], Decimal("80.00"))
+        
+        # Verificar que tasa estadística es 3% del CIF
+        self.assertEqual(impuestos["tasa_est"], Decimal("30.00"))
+        
+        # Verificar que IVA se calcula sobre base correcta
+        # Base IVA = CIF + DI + tasa_est
+        base_esperada = cif + impuestos["di"] + impuestos["tasa_est"]
+        iva_esperado = PresupuestoService._round(base_esperada * Decimal("0.21"))
+        self.assertEqual(impuestos["iva"], iva_esperado)
+
+    def test_calcular_impuestos_con_courier(self):
+        """Test: Calcular impuestos para celular con courier (DI 50%)"""
+        cif = Decimal("1000.00")
+        origen = "US"
+        tipo = "celulares"
+        es_courier = True
+        
+        impuestos = PresupuestoService.calcular_impuestos(cif, origen, tipo, es_courier)
+        
+        # DI debe ser 50% para celular con courier
+        self.assertEqual(impuestos["di"], Decimal("500.00"))
+        
+        # Verificar que tasa estadística es 3% del CIF
+        self.assertEqual(impuestos["tasa_est"], Decimal("30.00"))
+
+    def test_calcular_completo(self):
+        """Test: Calcular presupuesto completo con todos los componentes"""
+        articulo = PresupuestoServiceTest.articulo_celular_fob()
+        
+        resultado = PresupuestoService.calcular(articulo)
+        
+        # Verificar estructura del resultado
+        self.assertIn("bases", resultado)
+        self.assertIn("unitario", resultado)
+        self.assertIn("total", resultado)
+        self.assertIn("fuentes", resultado)
+        
+        # Verificar bases
+        self.assertEqual(resultado["bases"]["tipo_producto"], "celulares")
+        self.assertEqual(resultado["bases"]["unidades"], 2)
+        
+        # Verificar unitario
+        self.assertIn("cif_usd", resultado["unitario"])
+        self.assertIn("impuestos_usd", resultado["unitario"])
+        self.assertIn("costo_final_usd", resultado["unitario"])
+        
+        # Verificar total
+        self.assertIn("costo_final_usd", resultado["total"])
+        self.assertIn("costo_final_ars", resultado["total"])
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,13 +1,9 @@
-from marshmallow import Schema, fields, validates_schema, ValidationError, validate
+from marshmallow import Schema, fields, validates_schema, ValidationError, validate, post_load
 import re
 import unicodedata
-
-# Opciones rápidas (catálogo embebido en el schema)
-TIPOS = ["celulares", "notebooks"]
-CATEGORIAS = {
-    "celulares": ["Ultra livianos", "Livianos estándar", "Peso medio", "Pesados/Potentes", "Muy pesados/Superphones"],
-    "notebooks": ["Ultrabook", "Convertible", "Estandar/Productividad", "Gaming ligero", "Gaming/Alto rendimiento", "Workstation/Profesional"],
-}
+from decimal import Decimal
+from app.config.domain_constants import TIPOS, CATEGORIAS
+from app.models.articulo import Articulo
 
 class ArticuloSchema(Schema):
     """
@@ -27,9 +23,10 @@ class ArticuloSchema(Schema):
     origen = fields.Str(required=True)
     valor_usd = fields.Float(required=True)
     unidades = fields.Int(required=True)
-    # Opcionales para el flujo: uno u otro
+    # Opcionales para el flujo
     modo_precio = fields.Str(required=False, validate=validate.OneOf(["CIF", "FOB"]))
     es_cif = fields.Boolean(required=False)
+    es_courier = fields.Boolean(required=False)
 
     @validates_schema
     def validar_dependencias(self, data, **kwargs):
@@ -79,3 +76,16 @@ class ArticuloSchema(Schema):
             raise ValidationError({
                 "unidades": ["Debe ser >= 1"]
             })
+
+    @post_load
+    def make_articulo(self, data, **kwargs):
+        """Convierte el dict validado a instancia de Articulo."""
+        return Articulo(
+            tipo_producto=data["tipo_producto"].lower(),
+            categoria_peso=data["categoria_peso"].lower(),
+            origen=data["origen"].upper(),
+            valor_usd=Decimal(str(data["valor_usd"])),
+            unidades=int(data["unidades"]),
+            modo_precio=(data.get("modo_precio") or "FOB").upper(),
+            es_courier=data.get("es_courier", False)
+        )
