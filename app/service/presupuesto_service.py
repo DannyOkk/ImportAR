@@ -15,3 +15,5 @@ class PresupuestoService:
     @staticmethod
     def read_all() -> list[Presupuesto]:
         return PresupuestoRepository.read_all()
+
+    
