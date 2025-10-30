@@ -7,7 +7,7 @@ import unicodedata
 from app.models import Presupuesto
 from app.models.articulo import Articulo
 from app.repositories import PresupuestoRepository
-from app.service.apidolar_service import FXService
+from app.service.apidolar_service import DolarApiService
 from app.config.domain_constants import PESO_PROMEDIO_KG, TARIFA_USD_KG, PARAMS, DI_PCT
 
 # Más precisión para impuestos
@@ -129,7 +129,7 @@ class PresupuestoService:
         imp_u = cls.calcular_impuestos(cif, dto.origen, dto.tipo_producto, dto.es_courier)
         costo_final_u = cif + sum(imp_u.values())
 
-        tc, fue_fallback = FXService.get_a3500()
+        tc, fue_fallback = DolarApiService.get_a3500()
         total_usd = cls._decimal(dto.unidades) * costo_final_u
         total_ars = total_usd * tc
 

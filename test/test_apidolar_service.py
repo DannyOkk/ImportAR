@@ -4,7 +4,7 @@ from decimal import Decimal
 from datetime import date
 from app.service.apidolar_service import DolarApiService
 
-class FXServiceTest(unittest.TestCase):
+class DolarApiServiceTest(unittest.TestCase):
 
     def setUp(self):
         # Guardar el valor original de A3500_FALLBACK
@@ -65,9 +65,9 @@ class FXServiceTest(unittest.TestCase):
         
         # Si vino de la API, imprimir para info
         if not fue_fallback:
-            print(f"\n✅ API BCRA funcionando - TC: {tc}")
+            print(f"\nAPI BCRA funcionando - TC: {tc}")
         else:
-            print(f"\n⚠️  Usando fallback - TC: {tc}")
+            print(f"\nUsando fallback - TC: {tc}")
 
 if __name__ == '__main__':
     unittest.main()
