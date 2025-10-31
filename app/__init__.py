@@ -5,10 +5,12 @@ from app.config import config
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
+from flask_cors import CORS
 
 db = SQLAlchemy()
 ma = Marshmallow()
 migrate = Migrate()
+
 def create_app() -> Flask:
     """
     Using an Application Factory
@@ -20,6 +22,16 @@ def create_app() -> Flask:
     f = config.factory(app_context if app_context else 'development')
     app.config.from_object(f)
 
+    # Habilitar CORS para todas las rutas
+    CORS(app, resources={
+        r"/api/*": {
+            "origins": ["http://localhost:3000", "http://127.0.0.1:3000"],
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"],
+            "supports_credentials": True
+        }
+    })
+
     db.init_app(app)
     ma.init_app(app)
     migrate.init_app(app, db)
@@ -28,6 +40,7 @@ def create_app() -> Flask:
     app.register_blueprint(presupuesto_bp, url_prefix='/api/v1/presupuestos')
     app.register_blueprint(usuario_bp, url_prefix='/api/v1/usuarios')
     app.register_blueprint(home_bp, url_prefix='/api/v1')
+    
     @app.shell_context_processor    
     def ctx():
         return {"app": app}
