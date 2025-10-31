@@ -353,6 +353,49 @@ class UsuarioTest(unittest.TestCase):
         self.assertEqual(response.status_code, 404)
         data = json.loads(response.data)
         self.assertEqual(data['message'], "Usuario no encontrado")
+
+    def test_repository_add_vs_merge(self):
+        """
+        Diferencia entre db.add() y db.merge() en el Repository
+        
+        - Repository.create() usa db.add(): Para objetos NUEVOS
+        - Repository.update() usa db.merge(): Para ACTUALIZAR existentes
+        
+        Este test respeta la arquitectura Service -> Repository -> DB
+        """
+        from app.models import Usuario
+        from app.repositories import UsuarioRepository
+        
+        # 1. CREATE con db.add() - Para objetos nuevos
+        usuario_nuevo = Usuario(
+            nombre="Usuario Nuevo",
+            email="nuevo@test.com",
+            password_hash="hash123",
+            rol="usuario",
+            plan="básico"
+        )
+        
+        # Repository.create() usa db.add() internamente
+        usuario_creado = UsuarioRepository.create(usuario_nuevo)
+        
+        self.assertIsNotNone(usuario_creado.id)
+        self.assertEqual(usuario_creado.nombre, "Usuario Nuevo")
+        
+        # 2. UPDATE con db.merge() - Para objetos existentes
+        usuario_existente = UsuarioRepository.get_by_id(usuario_creado.id)
+        usuario_existente.nombre = "Usuario Actualizado"
+        usuario_existente.rol = "admin"
+        
+        # Repository.update() usa db.merge() internamente
+        usuario_actualizado = UsuarioRepository.update(usuario_existente)
+        
+        self.assertEqual(usuario_actualizado.nombre, "Usuario Actualizado")
+        self.assertEqual(usuario_actualizado.rol, "admin")
+        
+        # Verificar que se actualizó correctamente
+        usuario_verificado = UsuarioRepository.get_by_id(usuario_creado.id)
+        self.assertEqual(usuario_verificado.nombre, "Usuario Actualizado")
+        self.assertEqual(usuario_verificado.rol, "admin")
     
 
 if __name__ == '__main__':
