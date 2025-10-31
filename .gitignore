@@ -142,3 +142,4 @@ pyvenv.cfg
 # add migration files
 migrations/
 
+uv.lock

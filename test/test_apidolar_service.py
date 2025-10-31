@@ -1,7 +1,6 @@
 import unittest
 import os
 from decimal import Decimal
-from datetime import date
 from app.service.apidolar_service import DolarApiService
 
 class DolarApiServiceTest(unittest.TestCase):
@@ -26,17 +25,8 @@ class DolarApiServiceTest(unittest.TestCase):
         self.assertIsInstance(fue_fallback, bool)
         self.assertGreater(tc, Decimal("0"))
 
-    def test_get_a3500_con_fecha(self):
-        """Test: get_a3500 puede recibir una fecha específica"""
-        fecha = date(2024, 1, 15)
-        tc, fue_fallback = DolarApiService.get_a3500(fecha)
-        
-        self.assertIsInstance(tc, Decimal)
-        self.assertGreater(tc, Decimal("0"))
-
     def test_fallback_cuando_api_falla(self):
         """Test: Si la API falla, debe usar el fallback de .env"""
-        # Forzar uso de fallback (el método _get_fallback siempre funciona)
         tc, fue_fallback = DolarApiService._get_fallback()
         
         self.assertEqual(tc, Decimal("1150.50"))
@@ -52,7 +42,7 @@ class DolarApiServiceTest(unittest.TestCase):
         self.assertTrue(fue_fallback)
 
     def test_get_a3500_integracion_real(self):
-        """Test de integración: Llamar a la API real del BCRA"""
+        """Test de integración: Llamar a la API real de dolarapi.com"""
         tc, fue_fallback = DolarApiService.get_a3500()
         
         # Verificar que obtuvimos un valor válido
@@ -60,12 +50,10 @@ class DolarApiServiceTest(unittest.TestCase):
         self.assertGreater(tc, Decimal("100"))  # TC razonable > 100
         self.assertLess(tc, Decimal("10000"))   # TC razonable < 10000
         
-        # Puede ser de la API o fallback, ambos son válidos
         self.assertIsInstance(fue_fallback, bool)
         
-        # Si vino de la API, imprimir para info
         if not fue_fallback:
-            print(f"\nAPI BCRA funcionando - TC: {tc}")
+            print(f"\nAPI dolarapi.com funcionando - TC: {tc}")
         else:
             print(f"\nUsando fallback - TC: {tc}")
 

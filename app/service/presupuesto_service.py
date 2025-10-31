@@ -154,7 +154,7 @@ class PresupuestoService:
                 "costo_final_ars": str(cls._round(total_ars)),
             },
             "fuentes": {
-                "fx": f"BCRA A3500 ({'fallback .env' if fue_fallback else 'oficial'})",
+                "fx": f"Dólar oficial dolarapi.com ({'fallback .env' if fue_fallback else 'online'})",
                 "arancel": "Tabla interna (MVP)",
                 "parametros": "Internos",
             },
@@ -174,4 +174,3 @@ class PresupuestoService:
     def read_all() -> list[Presupuesto]:
         return PresupuestoRepository.read_all()
 
-    
