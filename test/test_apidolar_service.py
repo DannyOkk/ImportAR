@@ -6,12 +6,12 @@ from app.service.apidolar_service import DolarApiService
 class DolarApiServiceTest(unittest.TestCase):
 
     def setUp(self):
-        # Guardar el valor original de A3500_FALLBACK
+        
         self.original_fallback = os.getenv("A3500_FALLBACK")
         os.environ['A3500_FALLBACK'] = '1150.50'
 
     def tearDown(self):
-        # Restaurar el valor original
+        
         if self.original_fallback:
             os.environ['A3500_FALLBACK'] = self.original_fallback
         else:
@@ -45,10 +45,10 @@ class DolarApiServiceTest(unittest.TestCase):
         """Test de integración: Llamar a la API real de dolarapi.com"""
         tc, fue_fallback = DolarApiService.get_a3500()
         
-        # Verificar que obtuvimos un valor válido
+        
         self.assertIsInstance(tc, Decimal)
-        self.assertGreater(tc, Decimal("100"))  # TC razonable > 100
-        self.assertLess(tc, Decimal("10000"))   # TC razonable < 10000
+        self.assertGreater(tc, Decimal("100"))  
+        self.assertLess(tc, Decimal("10000"))   
         
         self.assertIsInstance(fue_fallback, bool)
         
