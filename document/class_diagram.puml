@@ -1,45 +1,113 @@
 @startuml
-title ImportAR – Core (User -> Simulation -> Budget + Expenses)
-
+skinparam style strictuml
 skinparam classAttributeIconSize 0
 
+' =============================
+' MODELOS (ORM / NEGOCIO)
+' =============================
 class Usuario {
-  -_id: str
-  -_nombre: str
-  -_email: str
-  -_password_hash: str
-  -_rol: str
-  -_plan: str
-  -_fecha_alta: datetime
-  --
-  +iniciarSimulacion(): Simulacion
+    +id: int
+    +nombre: str
+    +email: str
+    +password_hash: str
+    +check_password(pw): bool
 }
 
-class Simulacion {
-  -_id: str
-  -_usuario_id: str
-  -_status: str
-  -_num_escenario: int
-  -_started_at: datetime
-  -_finished_at: datetime
-  --
-  +generarPresupuesto(): Presupuesto
-  +calcularGastos(): null
+class Articulo {
+    +id: int
+    +descripcion: str
+    +valor_fob: float
+    +peso_kg: float
+    +origen: str
 }
 
 class Presupuesto {
-  -_id: str
-  -_simulacion_id: str
-  -_estado: str
-  -_moneda: str
-  -_total: float
-  -_detalle: dict
-  --
-  +calculaGastoTotal(): float
+    +id: int
+    +costo_total: float
+    +impuestos: float
+    +aranceles: float
+    +calcular_total(): float
 }
 
+' =============================
+' SCHEMAS (Marshmallow)
+' =============================
+class UsuarioSchema {
+    +load(json): Usuario
+    +dump(usuario: Usuario): dict
+}
 
-Usuario "1" o-- "0..*" Simulacion : realiza >
-Simulacion "1" o-- "1" Presupuesto : produce >
+class ArticuloSchema {
+    +load(json): Articulo
+    +dump(articulo: Articulo): dict
+}
+
+class PresupuestoSchema {
+    +dump(presupuesto: Presupuesto): dict
+}
+
+' =============================
+' REPOSITORY (Persistencia)
+' =============================
+class PresupuestoRepository {
+    +save(p: Presupuesto): Presupuesto
+    +get_by_id(id: int): Presupuesto
+    +list_all(): list<Presupuesto>
+}
+
+class UsuarioRepository {
+    +create(u: Usuario): Usuario
+    +read_all(): list<Usuario>
+    +get_by_id(id: int): Usuario
+    +delete(id: int): bool
+}
+
+' =============================
+' SERVICE (Lógica de negocio)
+' =============================
+class PresupuestoService {
+    +calcular_presupuesto(articulo: Articulo): Presupuesto
+    +guardar_presupuesto(p: Presupuesto): Presupuesto
+}
+
+class UsuarioService {
+    +create_user(data: dict): Usuario
+    +read_all(): list<Usuario>
+    +delete_user(id: int): bool
+}
+
+' =============================
+' CONTROLLER (Flask Blueprint)
+' =============================
+class PresupuestoController {
+    +POST /api/v1/presupuesto/calcular
+}
+
+class UsuarioController {
+    +GET /api/v1/usuarios/
+    +POST /api/v1/usuarios/
+}
+
+' =============================
+' RELACIONES
+' =============================
+
+' Controller usa Service
+PresupuestoController --> PresupuestoService
+UsuarioController --> UsuarioService
+
+' Service usa Repository
+PresupuestoService --> PresupuestoRepository
+UsuarioService --> UsuarioRepository
+
+' Service crea / devuelve modelos
+PresupuestoService --> Presupuesto
+PresupuestoService --> Articulo
+UsuarioService --> Usuario
+
+' Schemas crean/serializan modelos
+UsuarioSchema --> Usuario
+ArticuloSchema --> Articulo
+PresupuestoSchema --> Presupuesto
 
 @enduml
