@@ -12,7 +12,6 @@ class UsuarioService:
         :return: The created Usuario object.
         :raises ValueError: If the email already exists.
         """
-        # Verificar si el email ya existe
         existing_usuario = UsuarioRepository.get_by_email(usuario.email)
         if existing_usuario:
             raise ValueError(f"El email {usuario.email} ya está registrado en el sistema")
@@ -55,9 +54,8 @@ class UsuarioService:
         existing_usuario.rol = usuario.rol
         existing_usuario.plan = usuario.plan
 
-        # Rehashear si vino un password nuevo (texto plano). Si no vino, dejar el hash actual.
         new_pwd = usuario.password_hash
-        if new_pwd:  # no tocar si viene None/''
+        if new_pwd:  
             existing_usuario.password_hash = EncrypterManager.hash_password(new_pwd)
 
         UsuarioRepository.update(existing_usuario)

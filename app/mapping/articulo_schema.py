@@ -15,7 +15,6 @@ class ArticuloSchema(Schema):
     - unidades: >= 1
     """
     class Meta:
-        # Ignora campos desconocidos para no fallar si vienen extras
         unknown = 'exclude'
 
     tipo_producto = fields.Str(required=True)
@@ -23,19 +22,18 @@ class ArticuloSchema(Schema):
     origen = fields.Str(required=True)
     valor_usd = fields.Float(required=True)
     unidades = fields.Int(required=True)
-    modo_precio = fields.Str(required=True, validate=validate.OneOf(["CIF", "FOB"]))
+    modo_precio = fields.Str(
+        required=True, validate=validate.OneOf(["CIF", "FOB"])
+        )
     es_courier = fields.Boolean(required=False)
 
     @validates_schema
     def validar_dependencias(self, data, **kwargs):
         def _norm(s: str) -> str:
             s = (s or "").strip()
-            # Normaliza acentos
             s = unicodedata.normalize('NFKD', s)
             s = ''.join(ch for ch in s if not unicodedata.combining(ch))
-            # Unifica separadores a espacios
             s = re.sub(r"[/\\\-]+", " ", s)
-            # Colapsa cualquier whitespace (incl. NBSP) a un solo espacio
             s = ' '.join(s.split())
             s = s.lower()
             return s
@@ -46,12 +44,10 @@ class ArticuloSchema(Schema):
         valor = data.get("valor_usd", -1)
         unidades = data.get("unidades", 0)
 
-        # tipo
         if tipo not in TIPOS:
             raise ValidationError({
                 "tipo_producto": [f"Debe ser uno de: {', '.join(TIPOS)}"]
             })
-        # categoria dependiente de tipo
         categorias_validas = CATEGORIAS.get(tipo, [])
         categorias_validas_map = {}
         for c in categorias_validas:
@@ -60,12 +56,10 @@ class ArticuloSchema(Schema):
             raise ValidationError({
                 "categoria_peso": [f"Para tipo '{tipo}', use: {', '.join(categorias_validas)}"]
             })
-        # origen (acepta US/CN)
         if origen not in ("US", "CN"):
             raise ValidationError({
                 "origen": ["Debe ser 'US' o 'CN'"]
             })
-        # valores numéricos
         if valor < 0:
             raise ValidationError({
                 "valor_usd": ["Debe ser >= 0"]

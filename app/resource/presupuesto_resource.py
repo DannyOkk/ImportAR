@@ -10,12 +10,8 @@ message_mapper = ResponseSchema()
 @presupuesto_bp.route("/calcular", methods=["POST"])
 @validate_with(ArticuloSchema)
 def calcular():
-    """
-    El schema ya validó y convirtió el JSON a Articulo via post_load.
-    @validate_with carga y valida; debemos reobtener el objeto Articulo del load.
-    """
     data = request.get_json(silent=True) or {}
-    articulo = ArticuloSchema().load(data)  # Devuelve instancia de Articulo
+    articulo = ArticuloSchema().load(data)  
 
     result = PresupuestoService.calcular(articulo)
     rb = ResponseBuilder()

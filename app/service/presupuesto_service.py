@@ -10,10 +10,8 @@ from app.repositories import PresupuestoRepository
 from app.service.apidolar_service import DolarApiService
 from app.config.domain_constants import PESO_PROMEDIO_KG, TARIFA_USD_KG, PARAMS, DI_PCT
 
-# Más precisión para impuestos
 getcontext().prec = 28
 
-# Mapa normalizado para lookup robusto de pesos
 def _norm_label(s: str) -> str:
     s = (s or "").strip()
     s = unicodedata.normalize('NFKD', s)
@@ -65,7 +63,6 @@ class PresupuestoService:
         if dto.modo_precio.upper() == "CIF":
             cif = cls._decimal(dto.valor_usd)
             return cif, {"modo": "CIF"}
-        # FOB
         fob = cls._decimal(dto.valor_usd)
         key_norm = (dto.tipo_producto.lower(), _norm_label(dto.categoria_peso))
         kg_prom = PESO_PROMEDIO_KG_N.get(key_norm, Decimal("0"))
@@ -94,7 +91,6 @@ class PresupuestoService:
         """
         tipo_norm = tipo_producto.lower()
         
-        # Determinar DI según tipo y courier
         if tipo_norm == "celulares":
             di_config = DI_PCT.get("celulares", {})
             di_pct = di_config.get("courier" if es_courier else "no_courier", Decimal("0"))

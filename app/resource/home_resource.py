@@ -17,13 +17,8 @@ def health():
 
 @home_bp.route('/cotizaciones', methods=['GET'])
 def cotizaciones():
-    """
-    Endpoint para obtener las cotizaciones del dólar (oficial y MEP)
-    """
-    # Obtener dólar oficial (A3500)
     tc_oficial, oficial_fallback = DolarApiService.get_a3500()
     
-    # Obtener dólar MEP
     tc_mep, mep_fallback = DolarApiService.get_mep()
     
     return jsonify({

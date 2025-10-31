@@ -79,19 +79,15 @@ class UsuarioTest(unittest.TestCase):
         self.assertEqual(updated_usuario.nombre, "Updated User")
 
     def test_usuario_update_password_changes(self):
-        # Crear usuario inicial con password en texto plano (se hashea en create)
         usuario = UsuarioServiceTest.usuario_creation()
         UsuarioService.create(usuario)
 
-        # Guardar el hash anterior
         old_hash = usuario.password_hash
         self.assertTrue(EncrypterManager.check_password(old_hash, "securepassword"))
 
-        # Actualizar con una nueva contraseña en texto plano
         usuario.password_hash = "new_secure_password"
         updated = UsuarioService.update(usuario, usuario.id)
 
-        # Traer de BD y verificar que cambió el hash y valida solo la nueva
         fetched = UsuarioService.get_by_id(usuario.id)
         self.assertIsNotNone(fetched)
         self.assertNotEqual(fetched.password_hash, old_hash)
@@ -111,7 +107,6 @@ class UsuarioTest(unittest.TestCase):
         usuario1 = UsuarioServiceTest.usuario_creation()
         UsuarioService.create(usuario1)
 
-        # Intentar crear otro usuario con el mismo email
         usuario2 = UsuarioServiceTest.usuario_creation()
         
         with self.assertRaises(ValueError) as context:
@@ -120,7 +115,6 @@ class UsuarioTest(unittest.TestCase):
         self.assertIn("email", str(context.exception).lower())
         self.assertIn("registrado", str(context.exception).lower())
 
-    # ==================== TESTS DE API (Issue #11) ====================
 
     def test_api_post_crear_usuario_exitoso(self):
         """
@@ -147,7 +141,6 @@ class UsuarioTest(unittest.TestCase):
         self.assertEqual(data['message'], "Usuario creado en el sistema")
         self.assertEqual(data['status_code'], 201)
 
-        # Verificar que el usuario fue creado en la base de datos
         usuarios = UsuarioService.read_all()
         self.assertEqual(len(usuarios), 1)
         self.assertEqual(usuarios[0].email, "juan.perez@example.com")
@@ -166,7 +159,6 @@ class UsuarioTest(unittest.TestCase):
             "plan": "básico"
         }
 
-        # Primer registro - debe ser exitoso
         response1 = self.client.post(
             '/api/v1/usuarios/',
             data=json.dumps(usuario_data),
@@ -174,7 +166,6 @@ class UsuarioTest(unittest.TestCase):
         )
         self.assertEqual(response1.status_code, 201)
 
-        # Segundo registro con el mismo email - debe fallar
         response2 = self.client.post(
             '/api/v1/usuarios/',
             data=json.dumps(usuario_data),
@@ -255,7 +246,6 @@ class UsuarioTest(unittest.TestCase):
         Endpoint: GET /api/v1/usuarios/
         Resultado esperado: 200 OK con lista de usuarios
         """
-        # Crear algunos usuarios de prueba
         usuario1 = UsuarioServiceTest.usuario_creation()
         UsuarioService.create(usuario1)
 
@@ -276,7 +266,6 @@ class UsuarioTest(unittest.TestCase):
         Endpoint: GET /api/v1/usuarios/<id>
         Resultado esperado: 200 OK con datos del usuario
         """
-        # Crear un usuario de prueba
         usuario = UsuarioServiceTest.usuario_creation()
         usuario_creado = UsuarioService.create(usuario)
 
@@ -305,11 +294,9 @@ class UsuarioTest(unittest.TestCase):
         Endpoint: PUT /api/v1/usuarios/<id>
         Resultado esperado: 200 OK con datos actualizados
         """
-        # Crear un usuario de prueba
         usuario = UsuarioServiceTest.usuario_creation()
         usuario_creado = UsuarioService.create(usuario)
 
-        # Actualizar el usuario
         usuario_actualizado = {
             "nombre": "Usuario Actualizado",
             "email": "actualizado@example.com",

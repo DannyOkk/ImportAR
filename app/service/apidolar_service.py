@@ -4,10 +4,8 @@ import os
 import requests
 
 class DolarApiService:
-    # API principal (única): dolarapi.com
     DOLAR_API_URL = "https://dolarapi.com/v1/dolares/oficial"
     
-    # Dólar MEP (Mercado Electrónico de Pagos)
     DOLAR_MEP_URL = "https://dolarapi.com/v1/dolares/bolsa"
 
     @staticmethod
@@ -30,15 +28,12 @@ class DolarApiService:
 
             if response.status_code == 200:
                 data = response.json()
-                # dolarapi.com devuelve {"compra": ..., "venta": ..., ...}
                 if "venta" in data:
                     tc = Decimal(str(data["venta"]))
                     return tc, False
         except Exception:
-            # si algo explota (timeout, etc.), cae al fallback
             pass
 
-        # fallback si la API no respondió bien
         return DolarApiService._get_fallback()
     
     @staticmethod
@@ -60,17 +55,12 @@ class DolarApiService:
             
             if response.status_code == 200:
                 data = response.json()
-                
-                # dolarapi.com devuelve: {"compra": 1520, "venta": 1530, ...}
-                # Usamos el precio de venta
                 if "venta" in data:
                     tc_mep = Decimal(str(data["venta"]))
                     return tc_mep, False
             
         except Exception:
             pass
-        
-        # Si falló, usar fallback
         raw = os.getenv("MEP_FALLBACK", "1500.0")
         try:
             tc_mep = Decimal(str(raw))
