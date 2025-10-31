@@ -6,6 +6,9 @@ import requests
 class DolarApiService:
     # API principal (única): dolarapi.com
     DOLAR_API_URL = "https://dolarapi.com/v1/dolares/oficial"
+    
+    # Dólar MEP (Mercado Electrónico de Pagos)
+    DOLAR_MEP_URL = "https://dolarapi.com/v1/dolares/bolsa"
 
     @staticmethod
     def get_a3500() -> tuple[Decimal, bool]:
@@ -37,7 +40,44 @@ class DolarApiService:
 
         # fallback si la API no respondió bien
         return DolarApiService._get_fallback()
-
+    
+    @staticmethod
+    def get_mep() -> tuple[Decimal, bool]:
+        """
+        Obtiene el tipo de cambio MEP (Mercado Electrónico de Pagos / Dólar Bolsa).
+        
+        Returns:
+            tuple[Decimal, bool]: (tipo_cambio_mep, fue_fallback)
+            - tipo_cambio_mep: El valor del dólar MEP
+            - fue_fallback: True si se usó el fallback, False si vino de la API
+        """
+        try:
+            response = requests.get(
+                DolarApiService.DOLAR_MEP_URL,
+                timeout=5,
+                headers={"Accept": "application/json"}
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # dolarapi.com devuelve: {"compra": 1520, "venta": 1530, ...}
+                # Usamos el precio de venta
+                if "venta" in data:
+                    tc_mep = Decimal(str(data["venta"]))
+                    return tc_mep, False
+            
+        except Exception:
+            pass
+        
+        # Si falló, usar fallback
+        raw = os.getenv("MEP_FALLBACK", "1500.0")
+        try:
+            tc_mep = Decimal(str(raw))
+        except Exception:
+            tc_mep = Decimal("1500.0")
+        return tc_mep, True
+    
     @staticmethod
     def _get_fallback() -> tuple[Decimal, bool]:
         """

@@ -23,9 +23,7 @@ class ArticuloSchema(Schema):
     origen = fields.Str(required=True)
     valor_usd = fields.Float(required=True)
     unidades = fields.Int(required=True)
-    # Opcionales para el flujo
-    modo_precio = fields.Str(required=False, validate=validate.OneOf(["CIF", "FOB"]))
-    es_cif = fields.Boolean(required=False)
+    modo_precio = fields.Str(required=True, validate=validate.OneOf(["CIF", "FOB"]))
     es_courier = fields.Boolean(required=False)
 
     @validates_schema
