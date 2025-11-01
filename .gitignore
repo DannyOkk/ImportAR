@@ -142,4 +142,7 @@ pyvenv.cfg
 # add migration files
 migrations/
 
+# database files
+/mysql-data/*
+
 uv.lock

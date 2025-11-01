@@ -25,7 +25,12 @@ def create_app() -> Flask:
     # Habilitar CORS para todas las rutas
     CORS(app, resources={
         r"/api/*": {
-            "origins": ["http://localhost:3000", "http://127.0.0.1:3000"],
+            "origins": [
+                "http://localhost:3000",      # React dev local
+                "http://127.0.0.1:3000",     # React dev local
+                "http://localhost",           # Frontend en Docker (puerto 80)
+                "http://localhost:80",        # Frontend en Docker explícito
+            ],
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"],
             "supports_credentials": True
