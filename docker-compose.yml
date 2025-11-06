@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # Servicio MySQL
   mysql:
     container_name: mysql-server
     image: mysql:8.0-debian
@@ -23,7 +22,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # Servicio de tu aplicación ImportAR (BACKEND)
   backend:
     container_name: importar-backend
     build:
@@ -32,10 +30,8 @@ services:
     ports:
       - "5000:5000"
     environment:
-      # Variables de entorno para la app
       FLASK_ENV: production
       FLASK_CONTEXT: production
-      # Configuración de base de datos
       PROD_DATABASE_URI: 'mysql+mysqlconnector://admin:admin@mysql-server:3306/importar'
     depends_on:
       mysql:
@@ -44,14 +40,12 @@ services:
       - mired
     restart: unless-stopped
 
-  # Servicio Frontend
   frontend:
     container_name: importar-frontend
     build:
       context: ../Front-ImporAR
       dockerfile: Dockerfile
       args:
-        # La URL del backend desde el navegador del usuario
         REACT_APP_API_URL: http://localhost:5000/api/v1
     ports:
       - "80:80"
